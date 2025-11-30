@@ -32,21 +32,32 @@ async function sendMessage() {
   scrollToBottom();
 
   try {
-    // 调用真实后端接口
-    const response = await api.chatWithAi(prompt);
+    // 创建一个新的空消息用于流式接收
+    const aiMsgId = Date.now() + 1;
+    messages.value.push({
+      id: aiMsgId,
+      type: 'ai',
+      content: ''
+    });
     
-    messages.value.push({
-      id: Date.now() + 1,
-      type: 'ai',
-      content: response.data
-    });
+    // 查找刚才添加的消息引用
+    const aiMsg = messages.value.find(m => m.id === aiMsgId);
+
+    // 调用流式接口
+    await api.streamChatWithAi(
+      prompt,
+      (chunk) => {
+        // 收到数据片段，追加到消息内容
+        aiMsg.content += chunk;
+        scrollToBottom();
+      },
+      (error) => {
+        console.error('AI Error:', error);
+        aiMsg.content += '\n[出错: 连接中断]';
+      }
+    );
   } catch (error) {
-    console.error('AI Error:', error);
-    messages.value.push({
-      id: Date.now() + 1,
-      type: 'ai',
-      content: '抱歉，AI 暂时无法响应，请稍后再试。'
-    });
+    console.error('System Error:', error);
   } finally {
     isLoading.value = false;
     scrollToBottom();
@@ -185,6 +196,10 @@ function scrollToBottom() {
   font-size: 0.9rem;
   line-height: 1.5;
   white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
