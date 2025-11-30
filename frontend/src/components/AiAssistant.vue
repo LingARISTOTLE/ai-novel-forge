@@ -1,8 +1,9 @@
 <script setup>
 import { ref } from 'vue';
+import api from '../services/api';
 
 const messages = ref([
-  { id: 1, type: 'ai', content: '你好！我是你的 AI 写作助手。可以在这里让我帮你生成大纲、续写剧情或设定角色。' }
+  { id: 1, type: 'ai', content: '你好！我是接入了 DeepSeek 的 AI 写作助手。可以在这里让我帮你生成大纲、续写剧情或设定角色。' }
 ]);
 const userInput = ref('');
 const isLoading = ref(false);
@@ -14,32 +15,42 @@ const quickActions = [
   { label: '👤 角色起名', prompt: '生成几个符合这种风格的角色名字...' }
 ];
 
-function sendMessage() {
-  if (!userInput.value.trim()) return;
+async function sendMessage() {
+  if (!userInput.value.trim() || isLoading.value) return;
+  
+  const prompt = userInput.value;
   
   // 添加用户消息
   messages.value.push({
     id: Date.now(),
     type: 'user',
-    content: userInput.value
+    content: prompt
   });
 
-  const prompt = userInput.value;
   userInput.value = '';
   isLoading.value = true;
+  scrollToBottom();
 
-  // 模拟 AI 回复 (后续对接真实后端)
-  setTimeout(() => {
+  try {
+    // 调用真实后端接口
+    const response = await api.chatWithAi(prompt);
+    
     messages.value.push({
       id: Date.now() + 1,
       type: 'ai',
-      content: `(模拟回复) 收到你的请求："${prompt}"。\n\n这是一个很好的切入点！建议你可以尝试从主角的心理活动入手，增加一些环境描写来烘托气氛...`
+      content: response.data
     });
+  } catch (error) {
+    console.error('AI Error:', error);
+    messages.value.push({
+      id: Date.now() + 1,
+      type: 'ai',
+      content: '抱歉，AI 暂时无法响应，请稍后再试。'
+    });
+  } finally {
     isLoading.value = false;
     scrollToBottom();
-  }, 1000);
-  
-  scrollToBottom();
+  }
 }
 
 function useQuickAction(prompt) {

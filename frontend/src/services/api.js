@@ -40,5 +40,10 @@ export default {
   },
   deleteChapter(id) {
     return apiClient.delete(`/chapters/${id}`);
+  },
+
+  // AI
+  chatWithAi(prompt) {
+    return apiClient.post('/ai/chat', { prompt });
   }
 };

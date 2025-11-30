@@ -16,3 +16,9 @@ spring:
   h2:
     console:
       enabled: true
+
+deepseek:
+  api:
+    url: https://api.deepseek.com/chat/completions
+    key: sk-2b1cef35cf2e402581e8a754ccc6315b
+    model: deepseek-chat
