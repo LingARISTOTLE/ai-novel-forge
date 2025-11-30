@@ -1,20 +1,40 @@
-# Dependencies
+# --- 核心依赖与构建目录 ---
 node_modules/
-
-# Production
-build/
-dist/
+**/node_modules/
 target/
+**/target/
+backend/target/
 
-# System
-.DS_Store
-.env
-*.log
+# --- 其他构建产物 ---
+dist/
+**/dist/
+build/
+**/build/
+coverage/
 
-# IDE
+# --- IDE 配置 ---
 .idea/
 .vscode/
 *.iml
 *.swp
+
+# --- 系统文件 ---
+.DS_Store
+.Thumbs.db
+
+# --- 日志与环境配置 ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.local
+*.local
+.pnp
+.pnp.js
+
+# --- Java 编译文件 ---
 *.class
 *.jar
+*.war
+*.ear
