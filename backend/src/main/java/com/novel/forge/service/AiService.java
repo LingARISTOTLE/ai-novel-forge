@@ -98,14 +98,25 @@ public class AiService {
                 if (conversationId == null) {
                     Conversation convo = new Conversation();
                     String title = request.getPrompt();
-                    if (title.length() > 20) title = title.substring(0, 20) + "...";
+                    if (title != null && title.length() > 20) {
+                        title = title.substring(0, 20) + "...";
+                    } else if (title == null || title.trim().isEmpty()) {
+                        title = "New Conversation";
+                    }
+                    System.out.println("Saving Conversation Title: " + title);
                     convo.setTitle(title);
                     conversationMapper.insert(convo);
                     conversationId = convo.getId();
                     System.out.println("Created new conversation: " + conversationId);
                     
-                    // Send meta event to frontend with new conversation ID
-                    emitter.send(SseEmitter.event().name("meta").data("{\"conversationId\": " + conversationId + "}"));
+                    // Send meta event to frontend with new conversation ID and Title
+                    // Use ObjectMapper to ensure valid JSON
+                    java.util.Map<String, Object> metaMap = new java.util.HashMap<>();
+                    metaMap.put("conversationId", conversationId);
+                    metaMap.put("title", title);
+                    String jsonMeta = objectMapper.writeValueAsString(metaMap);
+                    
+                    emitter.send(SseEmitter.event().name("meta").data(jsonMeta));
                 } else {
                     System.out.println("Continuing conversation: " + conversationId);
                 }

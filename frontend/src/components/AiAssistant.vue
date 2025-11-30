@@ -198,7 +198,16 @@ async function sendMessage() {
         // 收到元数据，更新 conversationId
         if (meta && meta.conversationId) {
             currentConversationId.value = meta.conversationId;
-            loadConversations(); // Refresh list to show new title
+            
+            // Update local list immediately
+            const exists = conversations.value.find(c => c.id === meta.conversationId);
+            if (!exists) {
+                conversations.value.unshift({
+                    id: meta.conversationId,
+                    title: meta.title || '新对话',
+                    updatedAt: new Date().toISOString()
+                });
+            }
         }
       },
       (error) => {

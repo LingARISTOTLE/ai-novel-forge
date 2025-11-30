@@ -24,8 +24,10 @@
 
     <update id="update" parameterType="com.novel.forge.entity.Conversation">
         UPDATE conversations
-        SET title = #{title},
+        <set>
+            <if test="title != null">title = #{title},</if>
             updated_at = NOW()
+        </set>
         WHERE id = #{id}
     </update>
 

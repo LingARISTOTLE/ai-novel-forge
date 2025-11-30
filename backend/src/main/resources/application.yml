@@ -5,7 +5,7 @@ spring:
   application:
     name: novel-forge-backend
   datasource:
-    url: jdbc:mysql://localhost:3306/novel_forge?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/novel_forge?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
     driverClassName: com.mysql.cj.jdbc.Driver
     username: root
     password: 
