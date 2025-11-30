@@ -47,14 +47,14 @@ export default {
     return apiClient.post('/ai/chat', { prompt });
   },
   
-  async streamChatWithAi(prompt, onMessage, onError) {
+  async streamChatWithAi(conversationId, prompt, onMessage, onMeta, onError) {
     try {
       const response = await fetch('/api/ai/chat/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ prompt, conversationId })
       });
 
       if (!response.ok) {
@@ -72,9 +72,21 @@ export default {
         const lines = chunk.split('\n');
         
         for (const line of lines) {
+          if (line.startsWith('event:meta')) {
+             // Next line should be data
+             continue;
+          }
           if (line.startsWith('data:')) {
             const data = line.slice(5);
-            onMessage(data);
+            // Simple check if it is JSON meta data
+            if (data.trim().startsWith('{') && data.includes('conversationId')) {
+                try {
+                    const meta = JSON.parse(data);
+                    if (onMeta) onMeta(meta);
+                } catch(e) {}
+            } else {
+                onMessage(data);
+            }
           }
         }
       }
@@ -82,5 +94,22 @@ export default {
       if (onError) onError(error);
       else console.error('Stream error:', error);
     }
+  },
+
+  // Conversations
+  getConversations() {
+    return apiClient.get('/conversations');
+  },
+  getConversationMessages(id) {
+    return apiClient.get(`/conversations/${id}/messages`);
+  },
+  createConversation(title) {
+    return apiClient.post('/conversations', { title });
+  },
+  updateConversation(id, title) {
+    return apiClient.put(`/conversations/${id}`, { title });
+  },
+  deleteConversation(id) {
+    return apiClient.delete(`/conversations/${id}`);
   }
 };

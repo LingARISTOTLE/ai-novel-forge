@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class AiRequest {
     private String prompt;
-    private String context; // Optional context like current chapter content
+    private String context; // Optional context
+    private Long conversationId; // Optional, if null, creates new conversation? Or maybe handled by frontend
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.novel.forge.mapper.ConversationMapper">
+
+    <resultMap id="ConversationResultMap" type="com.novel.forge.entity.Conversation">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <select id="findAll" resultMap="ConversationResultMap">
+        SELECT * FROM conversations ORDER BY updated_at DESC
+    </select>
+
+    <select id="findById" resultMap="ConversationResultMap">
+        SELECT * FROM conversations WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.novel.forge.entity.Conversation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO conversations (title, created_at, updated_at)
+        VALUES (#{title}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.novel.forge.entity.Conversation">
+        UPDATE conversations
+        SET title = #{title},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM conversations WHERE id = #{id}
+    </delete>
+
+</mapper>
