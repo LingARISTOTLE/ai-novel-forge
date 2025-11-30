@@ -14,6 +14,15 @@ const chapters = ref([]);
 const showCreateNovelModal = ref(false);
 const newNovelTitle = ref('');
 
+// Expose methods to parent
+defineExpose({
+  refreshChapters: () => {
+    if (props.selectedNovelId) {
+      fetchChapters(props.selectedNovelId);
+    }
+  }
+});
+
 onMounted(async () => {
   await fetchNovels();
 });
@@ -146,16 +155,17 @@ function selectChapter(id) {
 <style scoped>
 .sidebar {
   width: 280px;
-  background: #f8f9fa;
+  background: #fcfcfc;
   border-right: 1px solid var(--color-border);
   height: 100%;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .section {
-  padding: 1.2rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
 }
@@ -163,39 +173,47 @@ function selectChapter(id) {
 .novels-section {
   border-bottom: 1px solid var(--color-border);
   max-height: 40%;
+  min-height: 200px;
   overflow-y: auto;
 }
 
 .chapters-section {
   flex: 1;
   overflow-y: auto;
+  background: #fcfcfc;
 }
 
 .empty-selection {
-  color: var(--vt-c-text-light-2);
+  color: #9ca3af;
   font-size: 0.9rem;
   text-align: center;
-  padding-top: 2rem;
+  padding-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.2rem;
 }
 
 .header h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--vt-c-text-light-1);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #374151; /* Dark gray */
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .add-btn {
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
   cursor: pointer;
   width: 28px;
   height: 28px;
@@ -203,13 +221,15 @@ function selectChapter(id) {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  color: var(--vt-c-text-light-2);
+  color: #6b7280;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .add-btn:hover {
-  background: var(--color-background);
-  color: var(--color-heading);
-  border-color: var(--color-border-hover);
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+  transform: translateY(-1px);
 }
 
 .list {
@@ -219,38 +239,47 @@ function selectChapter(id) {
 }
 
 .list li {
-  padding: 0.6rem 0.8rem;
+  padding: 0.75rem 1rem;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px;
   margin-bottom: 4px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   font-size: 0.95rem;
-  color: var(--color-text);
+  color: #4b5563;
   border: 1px solid transparent;
 }
 
 .list li:hover {
-  background: #fff;
-  border-color: var(--color-border);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
 }
 
 .list li.active {
-  background: #e6f7ff;
-  color: #1890ff;
-  font-weight: 500;
-  border-color: #bae7ff;
+  background: #ffffff;
+  color: #2563eb; /* Brand blue */
+  font-weight: 600;
+  border-color: #e5e7eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+  border-left: 3px solid #2563eb;
 }
 
 .novel-item, .chapter-item {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.8rem;
 }
 
 .novel-icon, .chapter-icon {
   font-size: 1.1rem;
-  opacity: 0.7;
+  opacity: 0.6;
+}
+
+.list li.active .novel-icon,
+.list li.active .chapter-icon {
+  opacity: 1;
+  transform: scale(1.1);
+  transition: transform 0.2s;
 }
 
 .chapter-title, .novel-title {
@@ -260,54 +289,75 @@ function selectChapter(id) {
 }
 
 .empty {
-  color: var(--vt-c-text-light-2);
+  color: #9ca3af;
   font-size: 0.9rem;
-  padding: 1rem;
+  padding: 1.5rem;
   text-align: center;
-  background: rgba(0,0,0,0.02);
-  border-radius: 4px;
+  background: repeating-linear-gradient(
+    45deg,
+    #f9fafb,
+    #f9fafb 10px,
+    #f3f4f6 10px,
+    #f3f4f6 20px
+  );
+  border-radius: 8px;
+  border: 1px dashed #e5e7eb;
 }
 
+/* Modal Styles */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(2px);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .modal {
-  background: var(--color-background);
+  background: #ffffff;
   padding: 2rem;
-  border-radius: 12px;
-  width: 360px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 16px;
+  width: 380px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05);
+  border: 1px solid #f3f4f6;
+  transform: scale(1);
+  animation: modalPop 0.2s ease-out;
+}
+
+@keyframes modalPop {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .modal h4 {
   margin-bottom: 1.5rem;
   font-size: 1.2rem;
-  font-weight: 600;
+  font-weight: 700;
+  color: #111827;
 }
 
 .modal input {
   width: 100%;
-  padding: 0.8rem;
+  padding: 0.8rem 1rem;
   margin-bottom: 1.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
   font-size: 1rem;
+  background: #f9fafb;
+  transition: all 0.2s;
 }
 
 .modal input:focus {
   outline: none;
-  border-color: #1890ff;
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .modal .actions {
@@ -317,25 +367,34 @@ function selectChapter(id) {
 }
 
 .modal button {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
   border: none;
-  transition: opacity 0.2s;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
 .btn-cancel {
-  background: #f5f5f5;
-  color: #666;
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.btn-cancel:hover {
+  background: #e5e7eb;
+  color: #111827;
 }
 
 .btn-primary {
-  background: #1890ff;
+  background: #2563eb;
   color: white;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
-.modal button:hover {
-  opacity: 0.9;
+.btn-primary:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px);
 }
 </style>

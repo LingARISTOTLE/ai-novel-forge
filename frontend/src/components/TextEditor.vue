@@ -132,91 +132,98 @@ async function saveChapter() {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: var(--color-background);
+  background: #ffffff;
+  position: relative;
 }
 
 .toolbar {
-  height: 48px;
-  border-bottom: 1px solid var(--color-border);
+  height: 56px;
+  border-bottom: 1px solid #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1.5rem;
-  background: #fff;
+  padding: 0 2rem;
+  background: #ffffff;
+  z-index: 10;
 }
 
 .left-tools {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.8rem;
   align-items: center;
 }
 
 .tool-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: none;
   background: transparent;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  color: var(--color-text);
-  font-size: 1rem;
+  color: #6b7280;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
 }
 
 .tool-btn:hover {
-  background: var(--color-background-mute);
+  background: #f3f4f6;
+  color: #111827;
 }
 
 .separator {
   width: 1px;
-  height: 20px;
-  background: var(--color-border);
+  height: 24px;
+  background: #e5e7eb;
   margin: 0 0.5rem;
 }
 
 .ai-toggle-btn {
-  border: 1px solid #1890ff;
-  color: #1890ff;
-  background: transparent;
-  padding: 0.3rem 0.8rem;
-  border-radius: 16px;
-  font-size: 0.85rem;
+  border: 1px solid #bfdbfe;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
 
 .ai-toggle-btn:hover {
-  background: #e6f7ff;
+  background: #dbeafe;
+  border-color: #93c5fd;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
 }
 
 .editor-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2rem 3rem 1rem 3rem;
-  background: var(--color-background);
+  padding: 2.5rem 4rem 1rem 4rem;
+  background: #ffffff;
 }
 
 .title-input {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.2rem;
+  font-weight: 800;
   border: none;
   background: transparent;
-  color: var(--color-heading);
+  color: #111827;
   width: 100%;
   outline: none;
   padding: 0.5rem 0;
-  font-family: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, serif;
+  line-height: 1.3;
 }
 
 .title-input::placeholder {
-  color: var(--vt-c-text-light-2);
-  opacity: 0.4;
+  color: #d1d5db;
 }
 
 .editor-content-wrapper {
@@ -227,37 +234,47 @@ async function saveChapter() {
   padding: 0 2rem;
 }
 
+/* Custom Scrollbar */
+.editor-content-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+.editor-content-wrapper::-webkit-scrollbar-thumb {
+  background-color: #e5e7eb;
+  border-radius: 4px;
+}
+
 .content-editor {
   width: 100%;
-  max-width: 800px;
+  max-width: 750px; /* Optimal reading width */
   height: 100%;
   resize: none;
   border: none;
   background: transparent;
-  font-family: 'Georgia', 'Source Serif Pro', serif;
-  font-size: 1.25rem;
+  font-family: 'Georgia', 'Cambria', 'Times New Roman', serif;
+  font-size: 1.2rem;
   line-height: 1.8;
-  color: var(--color-text);
+  color: #374151;
   outline: none;
-  padding: 0 1rem 4rem 1rem;
+  padding: 0 1rem 6rem 1rem;
 }
 
 .status-bar {
-  height: 32px;
-  border-top: 1px solid var(--color-border);
+  height: 36px;
+  border-top: 1px solid #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1.5rem;
-  background: #f8f9fa;
-  font-size: 0.8rem;
-  color: var(--vt-c-text-light-2);
+  padding: 0 2rem;
+  background: #ffffff;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .stats-info {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
 .save-info {
@@ -266,11 +283,12 @@ async function saveChapter() {
 }
 
 .status.saving {
-  color: #e6a23c;
+  color: #f59e0b; /* Amber */
+  font-weight: 500;
 }
 
 .status.saved {
-  color: #67c23a;
+  color: #10b981; /* Emerald */
 }
 
 .empty-state {
@@ -278,22 +296,28 @@ async function saveChapter() {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--vt-c-text-light-2);
-  background: var(--color-background-soft);
+  color: #9ca3af;
+  background: #fcfcfc;
 }
 
 .empty-content {
   text-align: center;
+  background: white;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  border: 1px solid #f3f4f6;
 }
 
 .empty-content .icon {
-  font-size: 4rem;
+  font-size: 3.5rem;
   display: block;
-  margin-bottom: 1rem;
-  opacity: 0.5;
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
 }
 
 .empty-content p {
   font-size: 1.1rem;
+  color: #6b7280;
 }
 </style>
