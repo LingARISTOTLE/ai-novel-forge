@@ -5,17 +5,18 @@ spring:
   application:
     name: novel-forge-backend
   datasource:
-    url: jdbc:h2:mem:noveldb
-    driverClassName: org.h2.Driver
-    username: sa
-    password: password
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: update
-  h2:
-    console:
-      enabled: true
+    url: jdbc:mysql://localhost:3306/novel_forge?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 
+  sql:
+    init:
+      mode: always
+  
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
 
 deepseek:
   api:
