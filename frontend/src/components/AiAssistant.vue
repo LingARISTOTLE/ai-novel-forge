@@ -1,12 +1,28 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import api from '../services/api';
 
 const messages = ref([
   { id: 1, type: 'ai', content: '你好！我是接入了 DeepSeek 的 AI 写作助手。可以在这里让我帮你生成大纲、续写剧情或设定角色。' }
 ]);
 const userInput = ref('');
-const isLoading = ref(false);
+const aiState = ref('idle'); // idle, thinking, streaming
+
+const statusText = computed(() => {
+  switch (aiState.value) {
+    case 'thinking': return '思考中...';
+    case 'streaming': return '正在输入...';
+    default: return '在线';
+  }
+});
+
+const statusColor = computed(() => {
+  switch (aiState.value) {
+    case 'thinking': return '#e6a23c'; // Orange
+    case 'streaming': return '#1890ff'; // Blue
+    default: return '#52c41a'; // Green
+  }
+});
 
 const quickActions = [
   { label: '🪄 剧情续写', prompt: '请根据当前情节续写一段...' },
@@ -16,7 +32,7 @@ const quickActions = [
 ];
 
 async function sendMessage() {
-  if (!userInput.value.trim() || isLoading.value) return;
+  if (!userInput.value.trim() || aiState.value !== 'idle') return;
   
   const prompt = userInput.value;
   
@@ -28,7 +44,7 @@ async function sendMessage() {
   });
 
   userInput.value = '';
-  isLoading.value = true;
+  aiState.value = 'thinking';
   scrollToBottom();
 
   try {
@@ -40,14 +56,13 @@ async function sendMessage() {
       content: ''
     });
     
-    // 查找刚才添加的消息引用
     const aiMsg = messages.value.find(m => m.id === aiMsgId);
 
-    // 调用流式接口
     await api.streamChatWithAi(
       prompt,
       (chunk) => {
-        // 收到数据片段，追加到消息内容
+        // 一旦收到第一个字符，状态切换为 streaming
+        if (aiState.value === 'thinking') aiState.value = 'streaming';
         aiMsg.content += chunk;
         scrollToBottom();
       },
@@ -59,10 +74,11 @@ async function sendMessage() {
   } catch (error) {
     console.error('System Error:', error);
   } finally {
-    isLoading.value = false;
+    aiState.value = 'idle';
     scrollToBottom();
   }
 }
+
 
 function useQuickAction(prompt) {
   userInput.value = prompt;
@@ -81,7 +97,13 @@ function scrollToBottom() {
 <template>
   <div class="ai-assistant">
     <div class="assistant-header">
-      <h3>🤖 AI 创意助手</h3>
+      <div class="header-left">
+        <h3>🤖 AI 创意助手</h3>
+      </div>
+      <div class="header-right">
+        <span class="status-dot" :style="{ background: statusColor }"></span>
+        <span class="status-text">{{ statusText }}</span>
+      </div>
     </div>
     
     <div class="chat-container">
@@ -94,10 +116,6 @@ function scrollToBottom() {
         >
           <div class="avatar">{{ msg.type === 'ai' ? '🤖' : '👤' }}</div>
           <div class="bubble">{{ msg.content }}</div>
-        </div>
-        <div v-if="isLoading" class="message ai">
-          <div class="avatar">🤖</div>
-          <div class="bubble loading">思考中...</div>
         </div>
       </div>
 
@@ -141,13 +159,32 @@ function scrollToBottom() {
   padding: 1rem;
   border-bottom: 1px solid var(--color-border);
   background: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.assistant-header h3 {
+.header-left h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
   color: var(--color-heading);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--vt-c-text-light-2);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background 0.3s;
 }
 
 .chat-container {
