@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
 import api from '../services/api';
+import VintageIcon from './VintageIcons.vue';
 
 // Simple Markdown Parser
 function parseMarkdown(text) {
@@ -40,8 +41,8 @@ const messages = ref([
 ]);
 const userInput = ref('');
 const aiState = ref('idle'); // idle, thinking, streaming
+const currentView = ref('chat'); // 'chat' or 'history'
 const currentConversationId = ref(null);
-const showHistory = ref(false);
 const conversations = ref([]);
 const titleInput = ref(null);
 
@@ -58,6 +59,15 @@ async function loadConversations() {
   }
 }
 
+function toggleHistory() {
+  if (currentView.value === 'chat') {
+    currentView.value = 'history';
+    loadConversations();
+  } else {
+    currentView.value = 'chat';
+  }
+}
+
 async function switchConversation(id) {
   try {
     currentConversationId.value = id;
@@ -67,7 +77,7 @@ async function switchConversation(id) {
       type: msg.role === 'assistant' ? 'ai' : 'user',
       content: msg.content
     }));
-    showHistory.value = false;
+    currentView.value = 'chat';
     scrollToBottom();
   } catch (e) {
     console.error('Failed to load messages', e);
@@ -77,7 +87,7 @@ async function switchConversation(id) {
 function startNewConversation() {
   currentConversationId.value = null;
   messages.value = [{ id: Date.now(), type: 'ai', content: '你好！我是接入了 DeepSeek 的 AI 写作助手。可以在这里让我帮你生成大纲、续写剧情或设定角色。' }];
-  showHistory.value = false;
+  currentView.value = 'chat';
 }
 
 async function deleteConversation(id, event) {
@@ -152,10 +162,10 @@ const statusColor = computed(() => {
 });
 
 const quickActions = [
-  { label: '🪄 剧情续写', prompt: '请根据当前情节续写一段...' },
-  { label: '✨ 润色文字', prompt: '请润色这段文字，使其更优美...' },
-  { label: '💡 生成灵感', prompt: '给我三个关于后续发展的反转灵感...' },
-  { label: '👤 角色起名', prompt: '生成几个符合这种风格的角色名字...' }
+  { icon: 'wand', label: '剧情续写', prompt: '请根据当前情节续写一段...' },
+  { icon: 'sparkle', label: '润色文字', prompt: '请润色这段文字，使其更优美...' },
+  { icon: 'bulb', label: '生成灵感', prompt: '给我三个关于后续发展的反转灵感...' },
+  { icon: 'person', label: '角色起名', prompt: '生成几个符合这种风格的角色名字...' }
 ];
 
 async function sendMessage() {
@@ -242,23 +252,19 @@ function scrollToBottom() {
   <div class="ai-assistant">
     <div class="assistant-header">
       <div class="header-left">
-        <button class="history-btn" @click="showHistory = !showHistory" title="历史记录">
-          ☰
+        <button class="nav-btn" @click="toggleHistory" :title="currentView === 'chat' ? '历史记录' : '返回'">
+          {{ currentView === 'chat' ? '☰' : '←' }}
         </button>
-        <h3>AI 创意助手</h3>
+        <h3>{{ currentView === 'chat' ? 'AI 创意助手' : '历史对话' }}</h3>
       </div>
-      <div class="header-right">
+      <div class="header-right" v-if="currentView === 'chat'">
         <span class="status-dot" :style="{ background: statusColor }"></span>
         <span class="status-text">{{ statusText }}</span>
       </div>
     </div>
     
-    <!-- History Drawer -->
-    <div class="history-drawer" :class="{ open: showHistory }">
-      <div class="drawer-header">
-        <h4>历史对话</h4>
-        <button class="close-btn" @click="showHistory = false">×</button>
-      </div>
+    <!-- History View -->
+    <div class="history-view" v-if="currentView === 'history'">
       <div class="new-chat-btn" @click="startNewConversation">
         + 新对话
       </div>
@@ -290,7 +296,8 @@ function scrollToBottom() {
       </ul>
     </div>
 
-    <div class="chat-container">
+    <!-- Chat View -->
+    <div class="chat-container" v-else>
       <div class="chat-history">
         <div 
           v-for="msg in messages" 
@@ -298,7 +305,9 @@ function scrollToBottom() {
           class="message"
           :class="msg.type"
         >
-          <div class="avatar">{{ msg.type === 'ai' ? '🤖' : '👤' }}</div>
+          <div class="avatar">
+            <VintageIcon :name="msg.type === 'ai' ? 'robot' : 'user'" size="medium" />
+          </div>
           <div class="bubble" v-html="parseMarkdown(msg.content)"></div>
         </div>
       </div>
@@ -328,24 +337,31 @@ function scrollToBottom() {
 
 <style scoped>
 .ai-assistant {
-  width: 340px;
-  background: #fcfcfc;
-  border-left: 1px solid var(--color-border);
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f5ede0 0%, #e8dcc8 100%);
   display: flex;
   flex-direction: column;
-  height: 100%;
-  flex-shrink: 0;
   position: relative;
+  /* 羊皮纸纹理 */
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 20px,
+      rgba(139, 115, 85, 0.03) 20px,
+      rgba(139, 115, 85, 0.03) 21px
+    );
 }
 
 .assistant-header {
   padding: 1.2rem;
-  background: #ffffff;
-  border-bottom: 1px solid #f0f0f0;
+  background: linear-gradient(180deg, #6b5b45 0%, #5d4e37 100%);
+  border-bottom: 2px solid #3a2f24;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
   z-index: 10;
 }
 
@@ -359,22 +375,30 @@ function scrollToBottom() {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #d4af37;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Georgia', 'Songti SC', serif;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.05em;
 }
 
-.history-btn {
+.nav-btn {
   background: transparent;
   border: none;
   font-size: 1.2rem;
   cursor: pointer;
-  color: #6b7280;
+  color: #d4c5b0;
   padding: 0;
   display: flex;
   align-items: center;
+  transition: color 0.2s;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.history-btn:hover {
-  color: #111827;
+.nav-btn:hover {
+  color: #fffef9;
 }
 
 .header-right {
@@ -383,10 +407,11 @@ function scrollToBottom() {
   gap: 0.5rem;
   font-size: 0.8rem;
   font-weight: 500;
-  color: #6b7280;
-  background: #f3f4f6;
+  color: #3a2f24;
+  background: rgba(212, 175, 55, 0.3);
   padding: 0.3rem 0.6rem;
-  border-radius: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(139, 115, 85, 0.3);
 }
 
 .status-dot {
@@ -397,62 +422,35 @@ function scrollToBottom() {
   transition: background 0.3s;
 }
 
-/* History Drawer */
-.history-drawer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #ffffff;
-  z-index: 20;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-  border-right: 1px solid #f0f0f0;
+/* History View */
+.history-view {
+  flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.history-drawer.open {
-  transform: translateX(0);
-}
-
-.drawer-header {
-  padding: 1.2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.drawer-header h4 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #6b7280;
+  overflow: hidden;
+  background: rgba(255, 250, 240, 0.5);
 }
 
 .new-chat-btn {
-  margin: 1rem;
+  margin: 1rem 1.5rem;
   padding: 0.8rem;
-  background: #2563eb;
-  color: white;
+  background: linear-gradient(135deg, #8b6f47 0%, #6b5b45 100%);
+  color: #fffef9;
   text-align: center;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  border: 1px solid #5d4e37;
+  font-family: 'Songti SC', 'STSong', serif;
+  letter-spacing: 0.05em;
 }
 
 .new-chat-btn:hover {
-  background: #1d4ed8;
+  background: linear-gradient(135deg, #a08968 0%, #8b7355 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
 }
 
 .conversation-list {
@@ -465,25 +463,30 @@ function scrollToBottom() {
 
 .conversation-list li {
   padding: 0.8rem;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
-  color: #374151;
+  color: #3a3025;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: background 0.2s;
+  background: rgba(255, 250, 240, 0.3);
+  border: 1px solid transparent;
 }
 
 .conversation-list li:hover {
-  background: #f3f4f6;
+  background: rgba(139, 111, 71, 0.2);
+  border-color: #c4b59f;
 }
 
 .conversation-list li.active {
-  background: #eff6ff;
-  color: #2563eb;
-  font-weight: 500;
+  background: rgba(139, 111, 71, 0.3);
+  color: #5d4e37;
+  font-weight: 600;
+  border-color: #8b7355;
+  box-shadow: inset 2px 0 4px rgba(0, 0, 0, 0.2);
 }
 
 .conv-title {
@@ -508,7 +511,7 @@ function scrollToBottom() {
 .edit-conv, .delete-conv {
   background: none;
   border: none;
-  color: #9ca3af;
+  color: #a08968;
   cursor: pointer;
   padding: 0.2rem;
   font-size: 1rem;
@@ -516,11 +519,11 @@ function scrollToBottom() {
 }
 
 .edit-conv:hover {
-  color: #2563eb;
+  color: #6b5b45;
 }
 
 .delete-conv:hover {
-  color: #ef4444;
+  color: #8b4513;
 }
 
 .edit-box {
@@ -531,10 +534,13 @@ function scrollToBottom() {
 .edit-box input {
   width: 100%;
   padding: 0.2rem 0.4rem;
-  border: 1px solid #2563eb;
-  border-radius: 4px;
+  border: 2px solid #8b7355;
+  border-radius: 3px;
   font-size: 0.9rem;
   outline: none;
+  background: #fffef9;
+  color: #3a3025;
+  font-family: 'Songti SC', 'STSong', serif;
 }
 
 .chat-container {
@@ -542,31 +548,103 @@ function scrollToBottom() {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #ffffff; /* White background like screenshot */
+  background: rgba(255, 250, 240, 0.5);
   position: relative;
 }
 
 .chat-history {
   flex: 1;
-  padding: 2rem;
+  padding: 2rem 1.5rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
+}
+
+/* 消息样式 */
+.message {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  animation: messageSlide 0.3s ease-out;
+}
+
+@keyframes messageSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message.user {
+  flex-direction: row-reverse;
+}
+
+.message .avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(139, 115, 85, 0.15);
+  border: 2px solid #c4b59f;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 5px;
+}
+
+.message.ai .avatar {
+  background: linear-gradient(135deg, #8b6f47 0%, #6b5b45 100%);
+  border-color: #5d4e37;
+}
+
+.message .avatar :deep(.vintage-icon) {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+.message .bubble {
+  max-width: 75%;
+  padding: 0.9rem 1.1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  font-family: 'Songti SC', 'STSong', serif;
+  word-wrap: break-word;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.message.ai .bubble {
+  background: #fffef9;
+  color: #2d2419;
+  border: 1px solid #e8e4dc;
+  border-left: 3px solid #8b7355;
+}
+
+.message.user .bubble {
+  background: linear-gradient(135deg, #8b6f47 0%, #6b5b45 100%);
+  color: #fffef9;
+  border: 1px solid #5d4e37;
+  text-align: right;
 }
 
 /* Input Area Redesign */
 .input-wrapper {
-  padding: 1.5rem 2rem 2rem 2rem;
-  background: #ffffff;
+  padding: 1.5rem 1.5rem 2rem 1.5rem;
+  background: rgba(245, 237, 224, 0.8);
+  border-top: 2px solid #d4c5b0;
 }
 
 .input-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 24px; /* Large rounded corners */
+  background: #fffef9;
+  border: 2px solid #c4b59f;
+  border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05); /* Soft shadow */
+  box-shadow: 0 4px 12px rgba(101, 84, 60, 0.2);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -574,26 +652,27 @@ function scrollToBottom() {
 }
 
 .input-card:focus-within {
-  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-  border-color: #d1d5db;
+  box-shadow: 0 6px 20px rgba(101, 84, 60, 0.3);
+  border-color: #8b7355;
 }
 
 .input-card textarea {
   border: none;
   background: transparent;
   padding: 0.5rem;
-  font-size: 1rem;
+  font-size: 0.95rem;
   resize: none;
   min-height: 60px;
   max-height: 200px;
   outline: none;
   width: 100%;
-  font-family: inherit;
-  color: #374151;
+  font-family: 'Songti SC', 'STSong', serif;
+  color: #2d2419;
+  line-height: 1.6;
 }
 
 .input-card textarea::placeholder {
-  color: #9ca3af;
+  color: #a08968;
 }
 
 .input-footer {
@@ -611,35 +690,40 @@ function scrollToBottom() {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #e5e7eb;
-  color: #9ca3af;
-  border: none;
+  background: #e8e4dc;
+  color: #a08968;
+  border: 1px solid #c4b59f;
   cursor: not-allowed;
   font-size: 1.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .send-circle-btn:not(:disabled) {
-  background: #000000;
-  color: #ffffff;
+  background: linear-gradient(135deg, #8b6f47 0%, #6b5b45 100%);
+  color: #fffef9;
+  border-color: #5d4e37;
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .send-circle-btn:not(:disabled):hover {
-  background: #333333;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, #a08968 0%, #8b7355 100%);
+  transform: scale(1.08);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* Code Block Styling */
 :deep(.code-block-wrapper) {
   margin: 1rem 0;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
-  background: #f6f8fa;
-  border: 1px solid #e1e4e8;
+  background: #f5ede0;
+  border: 2px solid #c4b59f;
+  box-shadow: 0 2px 6px rgba(101, 84, 60, 0.2);
 }
 
 :deep(.code-header) {
@@ -647,15 +731,18 @@ function scrollToBottom() {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 1rem;
-  background: #f1f3f5;
-  border-bottom: 1px solid #e1e4e8;
+  background: rgba(139, 115, 85, 0.15);
+  border-bottom: 2px solid #d4c5b0;
   font-size: 0.8rem;
-  color: #666;
+  color: #6b5b45;
+  font-weight: 600;
 }
 
 :deep(.code-lang) {
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
+  color: #8b7355;
+  letter-spacing: 0.05em;
 }
 
 :deep(.code-actions) {
@@ -670,30 +757,47 @@ function scrollToBottom() {
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 0.9rem;
   line-height: 1.5;
-  color: #24292e;
+  color: #3a3025;
+  background: #fffef9;
 }
 
 :deep(.inline-code) {
-  background: #f3f4f4;
+  background: rgba(139, 115, 85, 0.15);
   padding: 0.2rem 0.4rem;
-  border-radius: 4px;
+  border-radius: 3px;
   font-family: monospace;
   font-size: 0.9em;
-  color: #e83e8c;
+  color: #8b4513;
+  border: 1px solid #d4c5b0;
 }
 
 /* Scrollbar styling for webkit */
 .chat-history::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 .chat-history::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(212, 197, 176, 0.2);
 }
 .chat-history::-webkit-scrollbar-thumb {
-  background-color: #e5e7eb;
-  border-radius: 3px;
+  background-color: #c4b59f;
+  border-radius: 4px;
+  border: 2px solid rgba(245, 237, 224, 0.5);
 }
 .chat-history::-webkit-scrollbar-thumb:hover {
-  background-color: #d1d5db;
+  background-color: #a08968;
+}
+
+.conversation-list::-webkit-scrollbar {
+  width: 6px;
+}
+.conversation-list::-webkit-scrollbar-track {
+  background: rgba(212, 197, 176, 0.2);
+}
+.conversation-list::-webkit-scrollbar-thumb {
+  background-color: #c4b59f;
+  border-radius: 3px;
+}
+.conversation-list::-webkit-scrollbar-thumb:hover {
+  background-color: #a08968;
 }
 </style>

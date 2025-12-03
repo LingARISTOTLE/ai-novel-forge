@@ -23,15 +23,25 @@
 
 /* semantic color variables for this project */
 :root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
+  /* 复古纸质主题颜色 */
+  --color-vintage-paper: #fffef9;
+  --color-vintage-parchment: #f5ede0;
+  --color-vintage-wood: #3a2f24;
+  --color-vintage-wood-light: #6b5b45;
+  --color-vintage-gold: #d4af37;
+  --color-vintage-brown: #8b7355;
+  --color-vintage-text: #2d2419;
+  --color-vintage-border: #c4b59f;
+  
+  --color-background: var(--color-vintage-paper);
+  --color-background-soft: var(--color-vintage-parchment);
+  --color-background-mute: #f5f3f0;
 
-  --color-border: var(--vt-c-divider-light-2);
-  --color-border-hover: var(--vt-c-divider-light-1);
+  --color-border: #e8e4dc;
+  --color-border-hover: var(--color-vintage-brown);
 
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
+  --color-heading: var(--color-vintage-text);
+  --color-text: var(--color-vintage-text);
 
   --section-gap: 160px;
 }
@@ -64,8 +74,7 @@ body {
   background: var(--color-background);
   transition: color 0.5s, background-color 0.5s;
   line-height: 1.6;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-    Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Songti SC', 'STSong', 'SimSun', 'Georgia', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif;
   font-size: 15px;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

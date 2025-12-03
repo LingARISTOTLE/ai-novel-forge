@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import api from '../services/api';
+import VintageIcon from './VintageIcons.vue';
 
 const props = defineProps({
   chapterId: Number
@@ -88,7 +89,8 @@ async function saveChapter() {
       </div>
       <div class="right-tools">
         <button class="ai-toggle-btn" @click="toggleAi">
-          🤖 AI 助手
+          <VintageIcon name="robot" size="medium" style="margin-right: 0.3rem;" />
+          AI 助手
         </button>
       </div>
     </div>
@@ -120,7 +122,7 @@ async function saveChapter() {
   </div>
   <div v-else class="empty-state">
     <div class="empty-content">
-      <i class="icon">📝</i>
+      <VintageIcon name="empty" size="large" class="icon" />
       <p>请选择一个章节开始写作</p>
     </div>
   </div>
@@ -132,19 +134,25 @@ async function saveChapter() {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: #ffffff;
+  background: #f5f3f0;
   position: relative;
+  /* 木纹桌面背景 */
+  background-image: 
+    linear-gradient(90deg, rgba(139, 115, 85, 0.02) 1px, transparent 1px),
+    linear-gradient(rgba(139, 115, 85, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 .toolbar {
   height: 56px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e8e4dc;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
-  background: #ffffff;
+  background: #faf8f5;
   z-index: 10;
+  box-shadow: 0 1px 3px rgba(101, 84, 60, 0.08);
 }
 
 .left-tools {
@@ -158,9 +166,9 @@ async function saveChapter() {
   height: 36px;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  color: #6b7280;
+  color: #8b7355;
   font-size: 1.1rem;
   display: flex;
   align-items: center;
@@ -169,8 +177,8 @@ async function saveChapter() {
 }
 
 .tool-btn:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: #f0ebe3;
+  color: #5d4e37;
 }
 
 .separator {
@@ -181,9 +189,9 @@ async function saveChapter() {
 }
 
 .ai-toggle-btn {
-  border: 1px solid #bfdbfe;
-  color: #2563eb;
-  background: #eff6ff;
+  border: 1px solid #d4c5b0;
+  color: #6b5b45;
+  background: #f5ede0;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.9rem;
@@ -192,13 +200,18 @@ async function saveChapter() {
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 0.3rem;
 }
 
 .ai-toggle-btn:hover {
-  background: #dbeafe;
-  border-color: #93c5fd;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+  background: #ebe0cf;
+  border-color: #c4b59f;
+  box-shadow: 0 2px 4px rgba(107, 91, 69, 0.15);
+}
+
+.ai-toggle-btn :deep(.vintage-icon) {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
 }
 
 .editor-header {
@@ -206,24 +219,25 @@ async function saveChapter() {
   justify-content: space-between;
   align-items: center;
   padding: 2.5rem 4rem 1rem 4rem;
-  background: #ffffff;
+  background: transparent;
 }
 
 .title-input {
   font-size: 2.2rem;
-  font-weight: 800;
+  font-weight: 700;
   border: none;
   background: transparent;
-  color: #111827;
+  color: #3a3025;
   width: 100%;
   outline: none;
   padding: 0.5rem 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, serif;
-  line-height: 1.3;
+  font-family: 'Songti SC', 'STSong', 'SimSun', serif;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
 }
 
 .title-input::placeholder {
-  color: #d1d5db;
+  color: #c4b59f;
 }
 
 .editor-content-wrapper {
@@ -231,44 +245,71 @@ async function saveChapter() {
   display: flex;
   justify-content: center;
   overflow-y: auto;
-  padding: 0 2rem;
+  padding: 1.5rem 2rem 2rem 2rem;
 }
 
 /* Custom Scrollbar */
 .editor-content-wrapper::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
+}
+.editor-content-wrapper::-webkit-scrollbar-track {
+  background: #f5f3f0;
 }
 .editor-content-wrapper::-webkit-scrollbar-thumb {
-  background-color: #e5e7eb;
-  border-radius: 4px;
+  background-color: #d4c5b0;
+  border-radius: 5px;
+  border: 2px solid #f5f3f0;
+}
+.editor-content-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: #c4b59f;
 }
 
 .content-editor {
   width: 100%;
-  max-width: 750px; /* Optimal reading width */
-  height: 100%;
+  max-width: 750px;
+  height: auto;
+  min-height: calc(100% - 4rem);
   resize: none;
   border: none;
-  background: transparent;
-  font-family: 'Georgia', 'Cambria', 'Times New Roman', serif;
-  font-size: 1.2rem;
-  line-height: 1.8;
-  color: #374151;
+  /* 纸张效果 */
+  background: #fffef9;
+  background-image: 
+    /* 纸张纹理 */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 31px,
+      rgba(139, 115, 85, 0.03) 31px,
+      rgba(139, 115, 85, 0.03) 32px
+    );
+  font-family: 'Songti SC', 'STSong', 'SimSun', 'Noto Serif SC', 'Georgia', serif;
+  font-size: 1.15rem;
+  line-height: 2;
+  color: #2d2419;
   outline: none;
-  padding: 0 1rem 6rem 1rem;
+  padding: 3rem 4rem 6rem 4rem;
+  /* 纸张阴影和边框 */
+  box-shadow: 
+    0 0 0 1px rgba(139, 115, 85, 0.08),
+    0 2px 4px rgba(101, 84, 60, 0.06),
+    0 8px 16px rgba(101, 84, 60, 0.08),
+    inset 0 0 100px rgba(255, 250, 240, 0.3);
+  border-radius: 2px;
+  margin: 0 auto;
 }
 
 .status-bar {
   height: 36px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #e8e4dc;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
-  background: #ffffff;
+  background: #faf8f5;
   font-size: 0.85rem;
-  color: #9ca3af;
+  color: #a08968;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 0 -1px 3px rgba(101, 84, 60, 0.05);
 }
 
 .stats-info {
@@ -283,12 +324,12 @@ async function saveChapter() {
 }
 
 .status.saving {
-  color: #f59e0b; /* Amber */
+  color: #c2893a;
   font-weight: 500;
 }
 
 .status.saved {
-  color: #10b981; /* Emerald */
+  color: #7a9b6f;
 }
 
 .empty-state {
@@ -296,28 +337,32 @@ async function saveChapter() {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #9ca3af;
-  background: #fcfcfc;
+  color: #a08968;
+  background: #f5f3f0;
 }
 
 .empty-content {
   text-align: center;
-  background: white;
+  background: #fffef9;
   padding: 3rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+  box-shadow: 
+    0 0 0 1px rgba(139, 115, 85, 0.08),
+    0 4px 12px rgba(101, 84, 60, 0.08),
+    0 8px 24px rgba(101, 84, 60, 0.06);
+  border: 1px solid #e8e4dc;
 }
 
 .empty-content .icon {
-  font-size: 3.5rem;
   display: block;
-  margin-bottom: 1.5rem;
-  opacity: 0.8;
+  margin: 0 auto 1.5rem;
+  opacity: 0.6;
+  filter: drop-shadow(2px 2px 4px rgba(101, 84, 60, 0.2));
 }
 
 .empty-content p {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: #8b7355;
+  font-family: 'Songti SC', 'STSong', serif;
 }
 </style>
